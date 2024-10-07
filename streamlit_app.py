@@ -34,7 +34,7 @@ hrv_data = filtered_data[["day", "nocturnal_hrv"]].reset_index(drop=True)
 hrv_data.dropna(inplace=True)
 
 avg_hrv = hrv_data["nocturnal_hrv"].mean()
-var_hrv = hrv_data["nocturnal_hrv"].var()
+std_hrv = hrv_data["nocturnal_hrv"].std()
 peak_hrv = hrv_data["nocturnal_hrv"].max()
 low_hrv = hrv_data["nocturnal_hrv"].min()
 
@@ -64,7 +64,7 @@ overview_data = {
         f"{avg_hrv:.2f} ms",
         f"{peak_hrv:.2f} ms on {peak_hrv_day.date()}",
         f"{low_hrv:.2f} ms on {low_hrv_day.date()}",
-        f"{var_hrv:.2f} ms",
+        f"{std_hrv:.2f} ms",
         f"{percent_above_baseline:.2f}%",
         f"{percent_below_baseline:.2f}%",
     ],
@@ -107,12 +107,12 @@ left_col, right_col = st.columns(2)
 with left_col:
     st.write(f"**Top 25% HRV Days**")
     st.write(f"HRV Range: {q75:.2f} ms and above")
-    st.dataframe(top_quartile[["day", "nocturnal_hrv"]], use_container_width=True, hide_index=True)
+    st.dataframe(top_quartile[["day", "nocturnal_hrv"]].rename(columns={'day': 'Day', 'nocturnal_hrv': "HRV"}), use_container_width=True, hide_index=True)
 
 with right_col:
     st.write(f"**Bottom 25% HRV Days**")
     st.write(f"HRV Range: {q25:.2f} ms and below")
-    st.dataframe(bottom_quartile[["day", "nocturnal_hrv"]], use_container_width=True, hide_index=True)
+    st.dataframe(bottom_quartile[["day", "nocturnal_hrv"]].rename(columns={'day': 'Day', 'nocturnal_hrv': "HRV"}), use_container_width=True, hide_index=True)
 
 # Plot HRV Quartiles using Box Plot
 fig = px.box(hrv_data, y="nocturnal_hrv", points="all")
@@ -211,7 +211,7 @@ last_30_days = data[(data["day"] >= earliest_date - pd.Timedelta(days=30)) & (da
 
 
 monthly_avg_hrv = last_30_days["nocturnal_hrv"].mean()
-monthly_var_hrv = last_30_days["nocturnal_hrv"].var()
+monthly_std_hrv = last_30_days["nocturnal_hrv"].std()
 
 high_hrv_days = last_30_days.loc[last_30_days["nocturnal_hrv"] > baseline, "day"]
 low_hrv_days = last_30_days.loc[last_30_days["nocturnal_hrv"] < baseline, "day"]
@@ -255,7 +255,7 @@ st.plotly_chart(fig)
 current_avg_hrv = filtered_data["nocturnal_hrv"].mean()
 
 hrv_difference = current_avg_hrv - monthly_avg_hrv
-current_var_hrv = filtered_data["nocturnal_hrv"].var()
+current_std_hrv = filtered_data["nocturnal_hrv"].std()
 
 # Create a dictionary with the HRV comparison metrics
 hrv_comparison = {
@@ -270,8 +270,8 @@ hrv_comparison = {
         f"{monthly_avg_hrv:.2f} ms",
         f"{current_avg_hrv:.2f} ms",
         f"{hrv_difference:.2f} ms",
-        f"{monthly_var_hrv:.2f} ms",
-        f"{current_var_hrv:.2f} ms",
+        f"{monthly_std_hrv:.2f} ms",
+        f"{current_std_hrv:.2f} ms",
     ],
 }
 
